@@ -2,7 +2,7 @@ import { Router } from 'express';
 import multer from 'multer';
 import path from 'path';
 
-import { getCustomRepository } from 'typeorm';
+import { getConnection, getCustomRepository } from 'typeorm';
 import { Request } from 'express-serve-static-core';
 import uploadConfig from '../config/upload';
 
@@ -52,7 +52,7 @@ transactionsRouter.post('/', async (request, response) => {
   try {
     const { title, value, type, category } = request.body;
 
-    const transactionsRepository = await getCustomRepository(
+    const transactionsRepository = getConnection().getCustomRepository(
       TransactionsRepository,
     );
 
@@ -60,6 +60,7 @@ transactionsRouter.post('/', async (request, response) => {
     const bal = await transactionsRepository.getBalance();
 
     if (bal.total < value && type === 'outcome') {
+      console.log('Sem fundos');
       throw new AppError('Not enough funds!', 400);
     }
 
